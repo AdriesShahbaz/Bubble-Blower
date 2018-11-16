@@ -1,0 +1,84 @@
+#include <IRremote.h> //To make sure the IR works
+#include <Servo.h> //To make sure the Servo works
+
+const int RECV_PIN = 3; //Receiving pin
+IRrecv irrecv(RECV_PIN); //Assign the pin to an IR type variable
+decode_results results; 
+unsigned long key_value = 0; //The value for the remotes button
+
+int leftf = 1; //Left front motor
+int leftb = 2; //Left back motor
+int rightb = 0; //Right back motor
+int rightf = 4; //Right front motor
+
+int motor = 7;
+int servo = 10;
+Servo myServo; 
+
+void setup(){
+  irrecv.enableIRIn(); //Enable the Infrared detector
+  irrecv.blink13(true); //Set its value to true
+  //Set all the motors to output
+  pinMode(leftf, OUTPUT);
+  pinMode(rightf, OUTPUT);
+  pinMode(leftb, OUTPUT);
+  pinMode(rightb, OUTPUT;
+  pinMode(motor, OUTPUT);
+  //Set all the motors to high except for the last one
+  digitalWrite(leftf, HIGH);
+  digitalWrite(rightf, HIGH);
+  digitalWrite(leftb, HIGH);
+  digitalWrite(rightb, HIGH);
+  digitalWrite(motor, LOW);
+  myServo.attach(servo); //Attach servo to pin
+}
+
+void loop(){
+  if (irrecv.decode(&results)){ //If the IR detects something
+ 
+        if (results.value == 0XFFFFFFFF) 
+        {
+          results.value = key_value; //Set the value to key value
+        }
+switch(results.value){
+          case 0xFDBD8C7D://FORWARD CASE
+          digitalWrite(rightf, LOW);
+          digitalWrite(leftf, LOW);
+          delay(100);
+          digitalWrite(rightf, HIGH);
+          digitalWrite(leftf, HIGH);
+          break;
+          
+          case 0x3C0A67AF://BACKWARDS CASE
+          digitalWrite(rightb, LOW);
+          digitalWrite(leftb, LOW);
+          delay(100);
+          digitalWrite(rightb, HIGH);
+          digitalWrite(leftb, HIGH);
+          break; 
+          case 0x99C67A57://LEFT CASE
+          digitalWrite(rightf, LOW);
+          delay(100);
+          digitalWrite(rightf, HIGH);
+          break; 
+case 0x512C81BF://RIGHT CASE
+          digitalWrite(leftf, LOW);
+          delay(100);
+          digitalWrite(leftf, HIGH);
+          break; 
+          
+          case 0x4EC5A18E: //GET THE BUBBLES AND BLOW THE FAN 
+          myServo.write(10);
+          delay(500);
+          myServo.write(160);
+          delay(500);
+          digitalWrite(motor, HIGH);
+          delay(2000);
+          digitalWrite(motor, LOW);
+          break;
+        }
+        key_value = results.value;
+        irrecv.resume(); //GET A NEW SIGNAL
+  }
+}
+
